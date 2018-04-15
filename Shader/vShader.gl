@@ -1,0 +1,36 @@
+#version 330 core
+
+layout(location = 0) in vec2 a_position;
+layout(location = 1) in vec2 a_textCoord;
+uniform mat4 u_projection;
+uniform mat4 u_MV;
+
+out vec3 v_norm;
+out vec3 v_point;
+out vec2 v_textCoord;
+
+float foo(vec2 p)
+{
+	//return 90*cos(3-(p.x*p.x+p.y*p.y))-exp(4*(p.x*p.x+p.y*p.y));
+    return 2*sin(p.x/2)+cos(p.y);
+    //return 1;
+	//a*cos(b-(x^2+z^2))-exp(c*(x^2+z^2))
+}
+
+vec3 grad(vec3 p)
+{
+    vec2 v = vec2(p.x,p.z);
+      return vec3( cos(v.x/2),/*d/dx*/
+                 1.0/*d/dy*/,
+                 -sin(v.y)/*d/dz*/ );
+    //return vec3(0.0,1.0,0.0);
+}
+
+void main()
+{
+	v_textCoord=a_textCoord;
+    vec3 point =vec3(a_position[0],foo(a_position),a_position[1]);
+    v_norm = transpose(inverse(mat3(u_MV))) * grad(point);
+    v_point = vec3(u_MV * vec4(point,1.0));
+    gl_Position = u_projection * u_MV * vec4(point, 1.0);//положение света
+}
